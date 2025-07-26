@@ -28,19 +28,23 @@
       border: 2px solid #0f0;
       padding: 20px;
       border-radius: 10px;
+      z-index: 1;
     }
 
     .messages {
       height: 300px;
       overflow-y: auto;
       margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
     .message {
-      margin: 8px 0;
       padding: 8px 12px;
       border-radius: 8px;
       max-width: 90%;
+      word-wrap: break-word;
     }
 
     .user {
@@ -53,6 +57,7 @@
     .bot {
       background: #222;
       color: #0f0;
+      align-self: flex-start;
       text-align: left;
     }
 
@@ -103,9 +108,10 @@
     const input = document.getElementById("input");
     const messages = document.getElementById("messages");
 
-    function addMessage(role, text) {
+    function addMessage(role, text, id = null) {
       const div = document.createElement("div");
       div.className = `message ${role}`;
+      if (id) div.id = id;
       div.textContent = text;
       messages.appendChild(div);
       messages.scrollTop = messages.scrollHeight;
@@ -118,7 +124,8 @@
       addMessage("user", userText);
       input.value = "";
 
-      addMessage("bot", "Typing...");
+      const botId = "bot-" + Date.now();
+      addMessage("bot", "Typing...", botId);
 
       try {
         const res = await fetch("https://mobileco.brotherbiplob369.workers.dev", {
@@ -134,9 +141,9 @@
 
         const data = await res.json();
         const botReply = data.choices?.[0]?.message?.content || "❌ No reply";
-        document.querySelector(".bot:last-child").textContent = botReply;
+        document.getElementById(botId).textContent = botReply;
       } catch (err) {
-        document.querySelector(".bot:last-child").textContent = "❌ Error: " + err.message;
+        document.getElementById(botId).textContent = "❌ Error: " + err.message;
       }
     }
 
