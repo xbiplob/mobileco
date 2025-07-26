@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Matrix AI Chat</title>
   <style>
     body {
@@ -71,6 +71,7 @@
         const reply = data.choices?.[0]?.message?.content || "No response";
         output.textContent = "AI: " + reply;
       } catch (err) {
+        console.error(err);
         output.textContent = "❌ Error: " + err.message;
       }
     }
