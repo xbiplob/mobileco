@@ -1,131 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Matrix Chat | MobileCo AI</title>
+  <meta charset="UTF-8">
+  <title>Matrix AI Chat</title>
   <style>
     body {
-      margin: 0;
-      font-family: 'Courier New', monospace;
-      background: black;
+      background-color: black;
       color: white;
-      overflow: hidden;
-    }
-
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: -1;
-    }
-
-    .chat-wrapper {
-      position: relative;
-      max-width: 600px;
-      margin: 50px auto;
-      background: rgba(0, 0, 0, 0.7);
-      border: 2px solid #0f0;
-      padding: 20px;
-      border-radius: 10px;
-      z-index: 1;
-    }
-
-    .messages {
-      height: 300px;
-      overflow-y: auto;
-      margin-bottom: 10px;
+      font-family: monospace;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 20px;
     }
-
-    .message {
-      padding: 8px 12px;
-      border-radius: 8px;
-      max-width: 90%;
-      word-wrap: break-word;
-    }
-
-    .user {
-      background: #004488;
-      color: #fff;
-      align-self: flex-end;
-      text-align: right;
-    }
-
-    .bot {
-      background: #222;
-      color: #0f0;
-      align-self: flex-start;
-      text-align: left;
-    }
-
-    .input-area {
-      display: flex;
-      gap: 10px;
-    }
-
-    input {
-      flex: 1;
-      padding: 10px;
+    textarea {
+      width: 100%;
+      max-width: 600px;
+      height: 100px;
       background: #111;
       color: white;
-      border: 1px solid #0f0;
-      border-radius: 5px;
+      border: 1px solid #555;
+      padding: 10px;
+      margin-bottom: 10px;
     }
-
     button {
       padding: 10px 20px;
-      background: #0f0;
-      color: black;
+      background: green;
+      color: white;
       border: none;
-      border-radius: 5px;
       cursor: pointer;
     }
-
-    @media (max-width: 600px) {
-      .chat-wrapper {
-        margin: 10px;
-        padding: 10px;
-        width: 95%;
-      }
+    pre {
+      margin-top: 20px;
+      max-width: 600px;
+      white-space: pre-wrap;
+      background: #222;
+      padding: 10px;
     }
   </style>
 </head>
 <body>
-  <canvas id="matrix"></canvas>
-
-  <div class="chat-wrapper">
-    <div class="messages" id="messages"></div>
-    <div class="input-area">
-      <input type="text" id="input" placeholder="Type your message..." />
-      <button onclick="sendMessage()">Send</button>
-    </div>
-  </div>
+  <h1>Matrix AI Chat 💬</h1>
+  <textarea id="input" placeholder="Type your message..."></textarea>
+  <button onclick="sendMessage()">Send</button>
+  <pre id="output">AI: Waiting...</pre>
 
   <script>
-    const input = document.getElementById("input");
-    const messages = document.getElementById("messages");
-
-    function addMessage(role, text, id = null) {
-      const div = document.createElement("div");
-      div.className = `message ${role}`;
-      if (id) div.id = id;
-      div.textContent = text;
-      messages.appendChild(div);
-      messages.scrollTop = messages.scrollHeight;
-    }
-
     async function sendMessage() {
-      const userText = input.value.trim();
-      if (!userText) return;
-
-      addMessage("user", userText);
-      input.value = "";
-
-      const botId = "bot-" + Date.now();
-      addMessage("bot", "Typing...", botId);
+      const userText = document.getElementById("input").value;
+      const output = document.getElementById("output");
+      output.textContent = "AI: Thinking...";
 
       try {
         const res = await fetch("https://mobileco.brotherbiplob369.workers.dev", {
@@ -135,50 +61,19 @@
           },
           body: JSON.stringify({
             model: "qwen/qwen3-235b-a22b-07-25:free",
-            messages: [{ role: "user", content: userText }]
+            messages: [
+              { role: "user", content: userText }
+            ]
           })
         });
 
         const data = await res.json();
-        const botReply = data.choices?.[0]?.message?.content || "❌ No reply";
-        document.getElementById(botId).textContent = botReply;
+        const reply = data.choices?.[0]?.message?.content || "No response";
+        output.textContent = "AI: " + reply;
       } catch (err) {
-        document.getElementById(botId).textContent = "❌ Error: " + err.message;
+        output.textContent = "❌ Error: " + err.message;
       }
     }
-
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") sendMessage();
-    });
-
-    // Matrix background
-    const canvas = document.getElementById("matrix");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const letters = "01";
-    const fontSize = 14;
-    const columns = canvas.width / fontSize;
-    const drops = Array.from({ length: columns }, () => 1);
-
-    function drawMatrix() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#0f0";
-      ctx.font = fontSize + "px monospace";
-
-      for (let i = 0; i < drops.length; i++) {
-        const text = letters[Math.floor(Math.random() * letters.length)];
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-        if (drops[i] * fontSize > canvas.height || Math.random() > 0.95) {
-          drops[i] = 0;
-        }
-        drops[i]++;
-      }
-    }
-
-    setInterval(drawMatrix, 50);
   </script>
 </body>
 </html>
